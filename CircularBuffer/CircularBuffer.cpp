@@ -252,36 +252,7 @@ void CircularBuffer::insert(int pos, const value_type& item) {
 				}
 			}
 		}
-
 		buffer[real_pos] = item;
-
-		/*if (head < tail) {
-			int j{ real_pos - pos };
-			push_front(buffer[head + 1]);
-
-			for (int i = pos; i > 0; --i) {
-				std::swap(buffer[j], buffer[++j]);
-			}
-			buffer[real_pos] = item;
-		}
-		else {
-			int j{ head + 1 };
-
-			push_front(buffer[head + 1]);
-
-			for (int i = capacity_ - head; i > 0; --i) {
-				std::swap(buffer[j], buffer[++j]);
-			}
-
-			if (real_pos < head) {
-				std::swap(buffer[0], buffer[capacity_ - 1]);
-				int k{ 0 };
-				for (int i = real_pos; i > 0; --i) {
-					std::swap(buffer[k], buffer[++k]);
-				}
-			}
-			buffer[real_pos] = item;
-		}*/
 	}
 }
 
