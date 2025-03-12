@@ -82,5 +82,5 @@ public:
 	void clear();
 };
 
-bool operator==(const CircularBuffer& a, const CircularBuffer& b);;
-bool operator!=(const CircularBuffer& a, const CircularBuffer& b);;
+bool operator==(const CircularBuffer& a, const CircularBuffer& b);
+bool operator!=(const CircularBuffer& a, const CircularBuffer& b);
