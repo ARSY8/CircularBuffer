@@ -210,23 +210,80 @@ void CircularBuffer::set_capacity(int new_capacity) {
 	}
 }
 
-//void CircularBuffer::insert(int pos, const value_type& item) {
-//	if (pos < 0 || pos > size_ + 1) {
-//		exit(1);
-//	}
-//	int new_pos{ head + pos - 1 };
-//	if (new_pos == head) {
-//		push_front(item);
-//	}
-//	else if (pos == tail) {
-//		push_back(item);
-//	}
-//	else {
-//		if (head < tail) {
-//
-//		}
-//	}
-//}
+void CircularBuffer::insert(int pos, const value_type& item) {
+	if (pos < 0 || pos > size_ + 1) {
+		exit(1);
+	}
+
+	if (size_ == capacity_) {
+		pop_back();
+	}
+
+	int real_pos{ head + pos };
+	if (real_pos > capacity_) real_pos -= capacity_;
+
+	if (real_pos == head) push_front(item);
+
+	else if (real_pos == tail) push_back(item);
+
+	else {
+		int j, count;
+		if (head < tail) {
+			j = real_pos - pos;
+			count = pos;
+		}
+		else {
+			j = head + 1;
+			count = capacity_ - head;
+		}
+
+		push_front(buffer[head + 1]);
+
+		for (int i = count; i > 0; --i) {
+			std::swap(buffer[j], buffer[++j]);
+		}
+
+		if (head > tail) {
+			if (real_pos < head) {
+				std::swap(buffer[0], buffer[capacity_ - 1]);
+				int k{ 0 };
+				for (int i = real_pos; i > 0; --i) {
+					std::swap(buffer[k], buffer[++k]);
+				}
+			}
+		}
+
+		buffer[real_pos] = item;
+
+		/*if (head < tail) {
+			int j{ real_pos - pos };
+			push_front(buffer[head + 1]);
+
+			for (int i = pos; i > 0; --i) {
+				std::swap(buffer[j], buffer[++j]);
+			}
+			buffer[real_pos] = item;
+		}
+		else {
+			int j{ head + 1 };
+
+			push_front(buffer[head + 1]);
+
+			for (int i = capacity_ - head; i > 0; --i) {
+				std::swap(buffer[j], buffer[++j]);
+			}
+
+			if (real_pos < head) {
+				std::swap(buffer[0], buffer[capacity_ - 1]);
+				int k{ 0 };
+				for (int i = real_pos; i > 0; --i) {
+					std::swap(buffer[k], buffer[++k]);
+				}
+			}
+			buffer[real_pos] = item;
+		}*/
+	}
+}
 
 void CircularBuffer::erase(int first, int last) {
 	if (first < 0 || last < 0 || last < first) exit(1);
