@@ -85,9 +85,11 @@ const value_type& CircularBuffer::operator[](int i) const{
 }
 
 void CircularBuffer::resize(int new_size, const value_type& item) {
-	if (new_size < 0) throw std::invalid_argument("Число не может быть отрицательным!");
+	if (new_size < 0) 
+		throw std::invalid_argument("Число не может быть отрицательным!");
 
-	if (size_ == new_size) return;
+	if (size_ == new_size) 
+		return;
 
 	if (new_size > size_) {
 		if (capacity_ < new_size)
@@ -111,7 +113,20 @@ void CircularBuffer::resize(int new_size, const value_type& item) {
 
 value_type& CircularBuffer::at(int i) {
 	if (i < size_ && i >= 0) {
-		return buffer[i];
+		int real_pos;
+
+		if (head < tail) {
+			real_pos = tail + i;
+			if (real_pos > capacity_)
+				real_pos -= capacity_;
+		}
+		else {
+			real_pos = tail - i;
+			if (real_pos < 0)
+				real_pos += capacity_;
+		}
+
+		return buffer[real_pos];
 	}
 	else {
 		throw std::out_of_range("Индекс выходит за границы кольцевого буффера!");
@@ -120,7 +135,20 @@ value_type& CircularBuffer::at(int i) {
 
 const value_type& CircularBuffer::at(int i) const {
 	if (i < size_ && i >= 0) {
-		return buffer[i];
+		int real_pos;
+
+		if (head < tail) {
+			real_pos = tail + i;
+			if (real_pos > capacity_)
+				real_pos -= capacity_;
+		}
+		else {
+			real_pos = tail - i;
+			if (real_pos < 0)
+				real_pos += capacity_;
+		}
+
+		return buffer[real_pos];
 	}
 	else {
 		throw std::out_of_range("Индекс выходит за границы кольцевого буффера!");
