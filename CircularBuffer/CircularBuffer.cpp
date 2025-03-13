@@ -51,11 +51,37 @@ CircularBuffer& CircularBuffer::operator=(const CircularBuffer& cb) {
 }
 
 value_type& CircularBuffer::operator[](int i) {
-	return buffer[i];
+	int real_pos;
+
+	if (head < tail) {
+		real_pos = tail + i;
+		if (real_pos > capacity_)
+			real_pos -= capacity_;
+	}
+	else {
+		real_pos = tail - i;
+		if (real_pos < 0)
+			real_pos += capacity_ ;
+	}
+
+	return buffer[real_pos];
 }
 
 const value_type& CircularBuffer::operator[](int i) const{
-	return buffer[i];
+	int real_pos;
+
+	if (head < tail) {
+		real_pos = tail + i;
+		if (real_pos > capacity_)
+			real_pos -= capacity_;
+	}
+	else {
+		real_pos = tail - i;
+		if (real_pos < 0)
+			real_pos += capacity_;
+	}
+
+	return buffer[real_pos];
 }
 
 void CircularBuffer::resize(int new_size, const value_type& item) {
