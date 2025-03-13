@@ -21,7 +21,7 @@ CircularBuffer::CircularBuffer(const CircularBuffer& cb) : size_(cb.size_), capa
 CircularBuffer::CircularBuffer(int capacity) : capacity_(capacity)
 {
 	if (capacity_ < 0) {
-		exit(1);
+		throw std::invalid_argument("Число не может быть отрицательным!");
 	}
 	//проверку на отрицательное значение
 	buffer = new value_type[capacity];
@@ -29,7 +29,7 @@ CircularBuffer::CircularBuffer(int capacity) : capacity_(capacity)
 
 CircularBuffer::CircularBuffer(int capacity, const value_type& elem) : CircularBuffer(capacity) {
 	if (capacity_ < 0) {
-		exit(1);
+		throw std::invalid_argument("Число не может быть отрицательным!");
 	}
 	for (int i = 0; i <= capacity; i++) {
 		buffer[i] = elem;
@@ -59,7 +59,7 @@ const value_type& CircularBuffer::operator[](int i) const{
 }
 
 void CircularBuffer::resize(int new_size, const value_type& item) {
-	if (new_size < 0) exit(1);
+	if (new_size < 0) throw std::invalid_argument("Число не может быть отрицательным!");
 
 	if (size_ == new_size) return;
 
@@ -88,8 +88,7 @@ value_type& CircularBuffer::at(int i) {
 		return buffer[i];
 	}
 	else {
-		std::cout << "Неверный индекс!" << std::endl;
-		exit(1);
+		throw std::out_of_range("Индекс выходит за границы кольцевого буффера!");
 	}
 }
 
@@ -98,8 +97,7 @@ const value_type& CircularBuffer::at(int i) const {
 		return buffer[i];
 	}
 	else {
-		std::cout << "Неверный индекс!" << std::endl;
-		exit(1);
+		throw std::out_of_range("Индекс выходит за границы кольцевого буффера!");
 	}
 }
 
@@ -214,7 +212,7 @@ void CircularBuffer::set_capacity(int new_capacity) {
 
 void CircularBuffer::insert(int pos, const value_type& item) {
 	if (pos < 0 || pos > size_ + 1) {
-		exit(1);
+		throw std::overflow_error("Выход за пределы допустимого диапазона!");
 	}
 
 	if (size_ == capacity_) {
