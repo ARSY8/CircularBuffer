@@ -62,10 +62,12 @@ void CircularBuffer::resize(int new_size, const value_type& item) {
 	if (new_size < 0) exit(1);
 
 	if (size_ == new_size) return;
-	else if (new_size > size_) {
-		if (capacity_ < new_size) capacity_ += new_size - size_;
+
+	if (new_size > size_) {
+		if (capacity_ < new_size)
+			capacity_ += new_size - size_;
 		for (int i = new_size - size_; i > 0; --i) {
-			push_front(item);
+			push_back(item);
 		}
 	}
 	else {
@@ -308,38 +310,30 @@ void CircularBuffer::push_back(const value_type& item) {
 }
 
 void CircularBuffer::pop_front() {
-	buffer[head] = 0;
-	size_--;
-	if (tail == head) {
-		return;
+	if (!empty()) {
+		buffer[head] = 0;
+		size_--;
+		if (tail == head) {
+			return;
+		}
+		head++;
+		if (head == capacity_) head = 0;
 	}
-	head++;
-	if (head == capacity_) head = 0;
 }
 
 void CircularBuffer::pop_back() {
-	buffer[tail] = 0;
-	size_--;
-	if (tail == head) {
-		return;
+	if (!empty()) {
+		buffer[tail] = 0;
+		size_--;
+		if (tail == head) {
+			return;
+		}
+		tail--;
+		if (tail < 0) tail = capacity_ - 1;
 	}
-	tail--;
-	if (tail < 0) tail = capacity_ - 1;
 }
 
-/*bool operator==(const CircularBuffer& a, const CircularBuffer& b); {
-	if (a.size() != b.size()) return false;
-	if (a.capacity() != b.capacity()) return false;
 
-	for (int i = 0; i < a.size(); ++i) {
-		if (a[i] != b[i]) return false;
-	}
-
-	return true;
-}
-bool operator!=(const CircularBuffer& a, const CircularBuffer& b); {
-	return !(a == b);
-}*/
 
 
 

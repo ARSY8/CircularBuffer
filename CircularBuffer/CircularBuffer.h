@@ -82,5 +82,17 @@ public:
 	void clear();
 };
 
-bool operator==(const CircularBuffer& a, const CircularBuffer& b);
-bool operator!=(const CircularBuffer& a, const CircularBuffer& b);
+bool operator==(const CircularBuffer& a, const CircularBuffer& b) {
+	if (a.size() != b.size()) return false;
+	if (a.capacity() != b.capacity()) return false;
+
+	for (int i = 0; i < a.size(); ++i) {
+		if (a[i] != b[i]) return false;
+	}
+
+	return true;
+}
+
+bool operator!=(const CircularBuffer& a, const CircularBuffer& b) {
+	return !(a == b);
+}
