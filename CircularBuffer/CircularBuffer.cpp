@@ -386,9 +386,3 @@ void CircularBuffer::pop_back() {
 		if (tail < 0) tail = capacity_ - 1;
 	}
 }
-
-
-
-
-
-
