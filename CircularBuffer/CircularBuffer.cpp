@@ -31,7 +31,7 @@ CircularBuffer::CircularBuffer(int capacity, const value_type& elem) : CircularB
 	if (capacity_ < 0) {
 		throw std::invalid_argument("Число не может быть отрицательным!");
 	}
-	for (int i = 0; i <= capacity; i++) {
+	for (int i = 0; i < capacity; i++) {
 		buffer[i] = elem;
 	}
 }
@@ -311,7 +311,9 @@ void CircularBuffer::insert(int pos, const value_type& item) {
 }
 
 void CircularBuffer::erase(int first, int last) {
-	if (first < 0 || last < 0 || last < first) exit(1);
+	if (first < 0 || last < 0 || last < first) 
+		throw std::overflow_error("Выход за пределы допустимого диапазона!");
+
 	if (first == 1 && last == size_) clear();
 	if (first != 1 && last == size_) {
 		int old_tail{ tail };
