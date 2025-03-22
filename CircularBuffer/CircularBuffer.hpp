@@ -1,6 +1,7 @@
-#pragma once
+#ifndef CIRCULAR_BUFFER_HPP
+#define CIRCULAR_BUFFER_HPP
 
-typedef char value_type;
+typedef int value_type;
 
 class CircularBuffer {
 	value_type* buffer{nullptr};
@@ -75,24 +76,15 @@ public:
 	void pop_front();
 
 	//Вставляет элемент item по индексу pos. Ёмкость буфера остается неизменной.
-	void insert(int pos, const value_type& item = value_type());;
+	void insert(int pos, const value_type& item = value_type());
 	//Удаляет элементы из буфера в интервале [first, last).
 	void erase(int first, int last);
 	//Очищает буфер.
 	void clear();
+
+    friend bool operator==(const CircularBuffer& a, const CircularBuffer& b);
+    friend bool operator!=(const CircularBuffer& a, const CircularBuffer& b);
+
 };
 
-bool operator==(const CircularBuffer& a, const CircularBuffer& b) {
-	if (a.size() != b.size()) return false;
-	if (a.capacity() != b.capacity()) return false;
-
-	for (int i = 0; i < a.size(); ++i) {
-		if (a[i] != b[i]) return false;
-	}
-
-	return true;
-}
-
-bool operator!=(const CircularBuffer& a, const CircularBuffer& b) {
-	return !(a == b);
-}
+#endif
