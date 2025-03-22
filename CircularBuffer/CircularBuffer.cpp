@@ -1,4 +1,4 @@
-#include "CircularBuffer.h"
+#include "CircularBuffer.hpp"
 #include <string.h>
 #include <iostream>
 
@@ -15,7 +15,7 @@ CircularBuffer::~CircularBuffer() {
 CircularBuffer::CircularBuffer(const CircularBuffer& cb) : size_(cb.size_), capacity_(cb.capacity_), head(cb.head), tail(cb.tail)
 {
 	buffer = new value_type[capacity_];
-	memcpy(buffer, cb.buffer, capacity_);
+	memcpy(buffer, cb.buffer, capacity_ * sizeof(value_type));
 }
 
 CircularBuffer::CircularBuffer(int capacity) : capacity_(capacity)
@@ -32,7 +32,7 @@ CircularBuffer::CircularBuffer(int capacity, const value_type& elem) : CircularB
 		throw std::invalid_argument("Число не может быть отрицательным!");
 	}
 	for (int i = 0; i < capacity; i++) {
-		buffer[i] = elem;
+		push_front(elem);
 	}
 }
 
@@ -46,40 +46,24 @@ CircularBuffer& CircularBuffer::operator=(const CircularBuffer& cb) {
 
 	delete[] buffer;
 	buffer = new value_type[capacity_];
-	memcpy(buffer, cb.buffer, capacity_);
+	memcpy(buffer, cb.buffer, capacity_	* sizeof(value_type));
 	return *this;
 }
 
 value_type& CircularBuffer::operator[](int i) {
-	int real_pos;
+	int real_pos = head + i;
 
-	if (head < tail) {
-		real_pos = tail + i;
-		if (real_pos > capacity_)
-			real_pos -= capacity_;
-	}
-	else {
-		real_pos = tail - i;
-		if (real_pos < 0)
-			real_pos += capacity_ ;
-	}
+	if (real_pos >= capacity_)
+		real_pos -= capacity_;
 
 	return buffer[real_pos];
 }
 
 const value_type& CircularBuffer::operator[](int i) const{
-	int real_pos;
+	int real_pos = head + i;
 
-	if (head < tail) {
-		real_pos = tail + i;
-		if (real_pos > capacity_)
-			real_pos -= capacity_;
-	}
-	else {
-		real_pos = tail - i;
-		if (real_pos < 0)
-			real_pos += capacity_;
-	}
+	if (real_pos >= capacity_)
+		real_pos -= capacity_;
 
 	return buffer[real_pos];
 }
@@ -156,19 +140,34 @@ const value_type& CircularBuffer::at(int i) const {
 }
 
 value_type& CircularBuffer::front() {
-	return buffer[head];
+	int front = head + 1;
+
+	if(front >= capacity_)
+		front -= capacity_;
+
+	return buffer[front];
 }
 
 value_type& CircularBuffer::back() {
-	return buffer[tail];
+	int back = tail - 1;
+	if(back < 0)
+		back = capacity_ - 1;
+	return buffer[back];
 }
 
 const value_type& CircularBuffer::front() const {
-	return buffer[head];
+	int front = head + 1;
+	if(front >= capacity_)
+		front -= capacity_;
+
+	return buffer[front];
 }
 
 const value_type& CircularBuffer::back() const {
-	return buffer[tail];
+	int back = tail - 1;
+	if(back < 0)
+		back = capacity_ - 1;
+	return buffer[back];
 }
 
 value_type* CircularBuffer::linearize() {
@@ -177,10 +176,12 @@ value_type* CircularBuffer::linearize() {
 	}
 	else {
 		int j;
+		int p;
 		for (int i = head; i > 0; --i) {
 			j = i - 1;
 			while (j != capacity_ - 1) {
-				std::swap(buffer[j], buffer[++j]);
+				p = j + 1;
+				std::swap(buffer[j], buffer[p]);
 			}
 		}
 	}
@@ -204,10 +205,12 @@ void CircularBuffer::rotate(int new_begin) {
 	if (index_new_begin == head) linearize();
 
 	int j;
+	int p;
 	for (int i = index_new_begin; i > 0; --i) {
 		j = i - 1;
 		while (j != capacity_ - 1) {
-			std::swap(buffer[j], buffer[++j]);
+			p = j + 1;
+			std::swap(buffer[j], buffer[p]);
 		}
 	}
 	tail = size_ - new_begin;
@@ -293,16 +296,21 @@ void CircularBuffer::insert(int pos, const value_type& item) {
 
 		push_front(buffer[head + 1]);
 
+		int p;
+
 		for (int i = count; i > 0; --i) {
-			std::swap(buffer[j], buffer[++j]);
+			p = j + 1;
+			std::swap(buffer[j], buffer[p]);
 		}
 
 		if (head > tail) {
 			if (real_pos < head) {
 				std::swap(buffer[0], buffer[capacity_ - 1]);
 				int k{ 0 };
+				int p;
 				for (int i = real_pos; i > 0; --i) {
-					std::swap(buffer[k], buffer[++k]);
+					p = k + 1;
+					std::swap(buffer[k], buffer[p]);
 				}
 			}
 		}
@@ -346,43 +354,78 @@ void CircularBuffer::clear() {
 }
 
 void CircularBuffer::push_front(const value_type& item){
-	buffer[head] = item;
-	head--;
+	static bool used = false;
+	if(head == 0 && tail == 0 && used == false){
+		tail++;
+		used = true;
+	}
+
+	buffer[head--] = item;
 	if (size_ < capacity_) size_++;
-	if (head == 0) head = capacity_ - 1;
+	if (head < 0) head = capacity_ - 1;
 	if (tail == head) tail--;
-	if (tail == 0) tail = capacity_ - 1;
+	if (tail < 0) tail = capacity_ - 1;
 }
 
 void CircularBuffer::push_back(const value_type& item) {
-	buffer[tail] = item;
-	tail++;
+	static bool used = false;
+	if(head == 0 && tail == 0 && used == false){
+		head = capacity_ - 1;
+		used = true;
+	}
+
+	buffer[tail++] = item;
 	if (size_ < capacity_) size_++;
 	if (tail == capacity_) tail = 0;
 	if (head == tail) head++;
-	if (head == capacity_) head = 0;
+	if (head >= capacity_) head = 0;
 }
 
 void CircularBuffer::pop_front() {
 	if (!empty()) {
+		head++;
+		if(head >= capacity_)
+			head = 0;
 		buffer[head] = 0;
 		size_--;
-		if (tail == head) {
-			return;
-		}
-		head++;
-		if (head == capacity_) head = 0;
+		if (tail == head)
+			tail++;
+
+		if(tail >= capacity_)
+			tail = 0;
 	}
 }
 
 void CircularBuffer::pop_back() {
 	if (!empty()) {
+		tail--;
+		if(tail < 0)
+			tail = capacity_ - 1;
+
 		buffer[tail] = 0;
 		size_--;
 		if (tail == head) {
-			return;
+			head--;
 		}
-		tail--;
-		if (tail < 0) tail = capacity_ - 1;
+		if(head < 0)
+			head = capacity_ - 1;
 	}
+}
+
+bool operator==(const CircularBuffer& a, const CircularBuffer& b) {
+	if (a.size() != b.size()) 
+		return false;
+	if (a.capacity() != b.capacity()) 
+		return false;
+
+	for (int i = 0; i < a.size(); ++i) {
+		if (a[i] != b[i]) 
+			return false;
+	}
+
+	return true;
+}
+
+bool operator!=(const CircularBuffer& a, const CircularBuffer& b) {
+	return !(a == b);
 }
