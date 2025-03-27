@@ -153,10 +153,10 @@ bool CircularBuffer::is_linearized() const {
 }
 
 void CircularBuffer::rotate(int new_begin) {
-	int index_new_begin{ head + new_begin - 1 };
-	if (index_new_begin >= capacity_) {
-		index_new_begin -= capacity_;
-	}
+	int index_new_begin = tail - new_begin;
+	if (index_new_begin < 0)
+		index_new_begin += capacity_;
+
 	if (index_new_begin == 0) return;
 	if (index_new_begin == head) linearize();
 
@@ -170,8 +170,12 @@ void CircularBuffer::rotate(int new_begin) {
 			j++;
 		}
 	}
-	tail = size_ - new_begin;
-	head = capacity_ - new_begin + 1;
+	tail = size_ - new_begin - 1;
+	if(tail < 0)
+		tail += capacity_; 
+	head = capacity_ - new_begin;
+	if(head < 0)
+		head += capacity_;
 }
 
 int CircularBuffer::size() const {
